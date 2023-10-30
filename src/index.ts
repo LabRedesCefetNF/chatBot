@@ -7,6 +7,7 @@ import {
   insertData,
   getDataFromDB,
 } from "./utils/utils";
+import { printSuccess } from "./utils/messages.ts";
 
 const { Mutex } = require("async-mutex");
 
@@ -39,6 +40,7 @@ async function start(client: Whatsapp) {
       `Obrigado por me enviar um endereço. Consultarei as informações sobre o domínio.\n→ ${url}`
     );
     await mutex.runExclusive(async () => {
+      url = url?.toLowerCase();
       url = url.replace(/https?[:\/]*/gi, "");
       url = url.split("/")[0];
       if (url.endsWith(".com")) url += ".br";
@@ -46,12 +48,14 @@ async function start(client: Whatsapp) {
         console.log(url);
         const data = await getWhoisData(url);
         if (data["errorCode"] !== 400 && data !== null) {
-          await client.sendText(
-            message.from,
-            `O endereço ${url} endereço é válido.`
-          );
+          await client.sendText(message.from, `O endereço ${url} é válido.`);
           if (getDataFromDB(url)) {
-            await client.sendText(message.from, `Já existe no banco de dados.`);
+            await client.sendText(
+              message.from,
+              `Empresa já consta no nosso sistema.\n\n${printSuccess(
+                getDataFromDB(url)
+              )}`
+            );
             return;
           }
           const mutexApi = new Mutex();
@@ -71,7 +75,7 @@ async function start(client: Whatsapp) {
               if (resultData) {
                 await client.sendText(
                   message.from,
-                  `Analisei os dados do domínio.`
+                  `Análise concluída.\n\n${printSuccess(resultData)}`
                 );
                 insertData(resultData);
               }
