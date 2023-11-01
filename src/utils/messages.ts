@@ -3,17 +3,27 @@ export const inconclusive = `Não é possível definir com precisão`;
 export const untrusted = `Não é confiável`;
 
 export function printSuccess(data: resultData) {
-  return `O domínio ${data.domain} possui os seguintes dados:
-Criado: ${formatData(data.created)}
-Última vez alterado: ${formatData(data.changed)}
-Expira em: ${formatData(data.expiration)}
-CNPJ: ${data.cnpj}
-CNPJ Ativo: ${data.active_cnpj == true ? "Sim" : "Não"}
-Telefone: ${data.tel}
-E-mail: ${data.email}
-Endereço: Rua ${data.address.place} N° ${data.address.number} CEP ${
-    data.address.cep
-  }\nCidade: ${data.address.city} - (${data.address.uf})`;
+  let message = `O domínio ${data.domain} possui os seguintes dados ⤵️\n
+- *Criado:* ${printData(formatData(data.created))}
+- *Última vez alterado:* ${printData(formatData(data.changed))}
+- *Expira em:* ${printData(formatData(data.expiration))}`;
+  console.log(data.type);
+  if (data.type == "cpf")
+    message += `
+- *CPF:* ${data.cnpj}\n
+Não foi possível realizar uma análise mais profunda dos dados, pois o domínio não está registrado em um CNPJ.`;
+  else if (data.type == "cnpj")
+    message += `
+- *CNPJ:* ${printData(data.cnpj)}
+- *CNPJ Ativo:* ${data.active_cnpj == true ? "Sim ✅" : "Não ⚠️"}
+- *Telefone:* ${printData(data.tel)}
+- *E-mail:* ${printData(data.email)}
+- *Endereço:* Rua ${printData(data.address.place)} N° ${printData(
+      data.address.number
+    )}
+- *CEP:* ${printData(data.address.cep)}
+- *Cidade:* ${printData(data.address.city)} - (${printData(data.address.uf)})`;
+  return message;
 }
 
 function formatData(date: string | null) {
@@ -23,6 +33,11 @@ function formatData(date: string | null) {
   }
   return `Não há data definida`;
 }
+
+function printData(data: string | null) {
+  if (data == null || data == "") return "Não informado ⚠️";
+  return data;
+}
 interface resultData {
   domain: string | null;
   created: string | null;
@@ -31,6 +46,7 @@ interface resultData {
   cnpj: string | null;
   date: string | null;
   active_cnpj: boolean | null;
+  type: string | null;
   tel: string | null;
   email: string | null;
   address: {

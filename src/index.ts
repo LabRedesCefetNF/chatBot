@@ -30,14 +30,14 @@ async function start(client: Whatsapp) {
     if (!url) {
       await client.sendText(
         message.from,
-        `Por favor, me envie um endereço de website para que eu possa consultá-lo.`
+        `Olá! Estou pronto para ajudá-lo a analisar um site.\nPor favor, sinta-se à vontade para compartilhar o link que deseja consultar.`
       );
       return;
     }
 
     await client.sendText(
       message.from,
-      `Obrigado por me enviar um endereço. Consultarei as informações sobre o domínio.\n→ ${url}`
+      `Obrigado por me enviar um endereço. Consultarei as informações sobre o domínio. 🔍\n→ ${url}`
     );
     await mutex.runExclusive(async () => {
       url = url?.toLowerCase();
@@ -52,7 +52,7 @@ async function start(client: Whatsapp) {
           if (getDataFromDB(url)) {
             await client.sendText(
               message.from,
-              `Empresa já consta no nosso sistema.\n\n${printSuccess(
+              `Empresa já consta no nosso sistema ✅.\n\n${printSuccess(
                 getDataFromDB(url)
               )}`
             );
@@ -64,7 +64,7 @@ async function start(client: Whatsapp) {
             try {
               await client.sendText(
                 message.from,
-                `Aguarde um pouco que estou analisando os dados do website.`
+                `Aguarde um pouco que estou analisando os dados do website. ⏰`
               );
               // await sleep(20000); // Limitado a 3 req./min
               // console.log(data);
@@ -75,14 +75,14 @@ async function start(client: Whatsapp) {
               if (resultData) {
                 await client.sendText(
                   message.from,
-                  `Análise concluída.\n\n${printSuccess(resultData)}`
+                  `Análise *concluída* ✅.\n\n${printSuccess(resultData)}`
                 );
                 insertData(resultData);
               }
             } catch {
               await client.sendText(
                 message.from,
-                `Tive um erro ao tentar consultar os dados do seu link:\n→ ${url}`
+                `Tive um erro ao tentar consultar o seu link ⤵️\n→ ${url} ⚠️`
               );
             } finally {
               await sleep(20000);
@@ -99,7 +99,7 @@ async function start(client: Whatsapp) {
         //Erro no fetch
         await client.sendText(
           message.from,
-          `Tive um erro ao tentar consultar o seu link:\n→ ${url}`
+          `Desculpe, ocorreu um erro ao consultar o link: ⚠️\n→ ${url}\n\nPor favor, verifique se o endereço do site está correto e considere que ele pode não possuir registro no Brasil.`
         );
       } //finally {
       //   mutex.release();

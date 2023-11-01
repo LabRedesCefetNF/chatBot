@@ -27,6 +27,7 @@ export function hasValidURL(words: string[]): string | null {
 
 export function getUsefulWhoisData(data: any): Object | undefined {
   console.log("get whois");
+  console.log(data["entities"][0].publicIds[0]);
   try {
     const usefulData = {
       domain: data.handle,
@@ -36,6 +37,7 @@ export function getUsefulWhoisData(data: any): Object | undefined {
         ? data.events[2].eventDate.split("T")[0]
         : null,
       cnpj: data["entities"][0].publicIds[0].identifier,
+      type: data["entities"][0].publicIds[0].type,
     };
     return usefulData;
   } catch (err) {
