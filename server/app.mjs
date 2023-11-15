@@ -1,9 +1,28 @@
-const app = express();
 import fetch from "node-fetch";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import mongoose from "mongoose";
 
+import dotenv from "dotenv";
+
+import UserSchema from "./model/userModel.js";
+const app = express();
+
+dotenv.config();
+
+import routes from "./routes/routes.js";
+
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("Conexão bem-sucedida com o MongoDB");
+  })
+  .catch((err) => {
+    console.error(`Erro na conexão com o MongoDB: ${err.message}`);
+  });
+
+app.use(express.json());
 app.use(
   session({
     secret: "BotWpp",
@@ -21,6 +40,7 @@ app.use(
     origin: "*",
   })
 );
+app.use("/api", routes);
 
 app.get("/whois/:slug", async (req, res) => {
   try {
@@ -49,6 +69,19 @@ app.get("/receita/:slug", async (req, res) => {
     },
   });
   res.json(await response.json());
+});
+
+app.get("/api/users/number/:numero", async (req, res) => {
+  const number = parseInt(req.params.numero);
+
+  try {
+    const user = await UserSchema.exists({ number: number });
+
+    res.json({ exists: !!user });
+  } catch (error) {
+    console.error("Erro na verificação do número:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 });
 
 app.listen(80, () => {

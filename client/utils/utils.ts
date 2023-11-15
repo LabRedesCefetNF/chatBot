@@ -1,4 +1,6 @@
-import { json } from "stream/consumers";
+import { Message } from "venom-bot";
+import { find } from "../../server/model/userModel";
+// import { consultUserByNumber } from "../../server/controller/userController.js";
 
 const fs = require("fs");
 const cron = require("node-cron");
@@ -47,6 +49,7 @@ export function getUsefulWhoisData(data: any): Object | undefined {
 
 export function getUsefulRFData(data: any): Object {
   const usefulData = {
+    name: data.nome,
     date: data.data_situacao,
     active_cnpj: data.situacao == "ATIVA" ? true : false,
     tel: data.telefone,
@@ -144,11 +147,109 @@ function resetDB() {
   }
 }
 
-// const hasValidURL = words.some((word) => {
-//   if (/^.+\..+/.test(word)) {
-//     console.log("testando", word);
-//     url = word;
-//     return true;
-//   }
-//   return false;
-// });
+export async function getWhoisData(url: string) {
+  console.log("searching whois data");
+  try {
+    const response = await fetch(`http://localhost:80/whois/${url}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.status === 404) {
+      return null;
+    }
+    console.log(response.status);
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao obter dados Whois.", error);
+    return null;
+  }
+}
+
+export async function getRfData(cnpj: string) {
+  console.log("searching receita data");
+  const cnpjSanitized = cnpj.replace(/[^\d]+/g, "");
+  try {
+    let response = await fetch(`http://localhost:80/receita/${cnpjSanitized}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response.status);
+    if (response.status === 404) {
+      return null;
+    }
+    console.log(response.status, "Busca Receita");
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao obter dados Receita.");
+    return null;
+  }
+}
+async function findUser(number: String) {
+  const numberSanitized = number.split("@")[0];
+  console.log("verificando se existe");
+  try {
+    let response = await fetch(
+      `http://localhost:80/api/users/number/${numberSanitized}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response.status);
+    if (response.status === 404) {
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao obter usuário.");
+    return null;
+  }
+}
+export async function saveMessageSender(message: Message) {
+  try {
+    const url = "http://localhost/api/users";
+    if (!message.sender) {
+      console.error("Sender not defined in message:", message);
+      return;
+    }
+    const { id: number, pushname: name } = message.sender;
+
+    const isUserRegistered = await findUser(number);
+    if (isUserRegistered.exists) {
+      console.log("User already exists");
+      return false;
+    }
+
+    const data = {
+      number,
+      name,
+    };
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to save user. Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    console.log("User saved successfully:", responseData);
+    return true
+  } catch (error: any) {
+    console.error("Error saving user:", error.message);
+  }
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

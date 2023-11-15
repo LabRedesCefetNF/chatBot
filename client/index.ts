@@ -6,8 +6,12 @@ import {
   mergeData,
   insertData,
   getDataFromDB,
+  getWhoisData,
+  getRfData,
+  saveMessageSender,
+  sleep,
 } from "./utils/utils";
-import { printSuccess } from "./utils/messages.ts";
+import { printSuccess, welcomeMessage } from "./utils/messages.ts";
 
 const { Mutex } = require("async-mutex");
 
@@ -24,8 +28,19 @@ async function start(client: Whatsapp) {
 
   client.onMessage(async (message: Message) => {
     if (!message.body || message.isGroupMsg) return;
+
+    const isFirstMessage = await saveMessageSender(message);
+    if (isFirstMessage) {
+      await client.sendText(
+        message.from,
+        welcomeMessage(message.sender.pushname)
+      );
+      return;
+    }
+
     const words = message.body.split(" ");
     let url = hasValidURL(words);
+    // console.log(message);
 
     if (!url) {
       await client.sendText(
@@ -52,7 +67,7 @@ async function start(client: Whatsapp) {
           if (getDataFromDB(url)) {
             await client.sendText(
               message.from,
-              `Empresa já consta no nosso sistema ✅.\n\n${printSuccess(
+              `Empresa já consta no nosso sistema. 🤓\n\n${printSuccess(
                 getDataFromDB(url)
               )}`
             );
@@ -75,7 +90,7 @@ async function start(client: Whatsapp) {
               if (resultData) {
                 await client.sendText(
                   message.from,
-                  `Análise *concluída* ✅.\n\n${printSuccess(resultData)}`
+                  `Análise *concluída*.\n\n${printSuccess(resultData)}`
                 );
                 insertData(resultData);
               }
@@ -99,56 +114,13 @@ async function start(client: Whatsapp) {
         //Erro no fetch
         await client.sendText(
           message.from,
-          `Desculpe, ocorreu um erro ao consultar o link: ⚠️\n→ ${url}\n\nPor favor, verifique se o endereço do site está correto e considere que ele pode não possuir registro no Brasil.`
+          `Desculpe, ocorreu um erro ao consultar o link: ⚠️\n→ ${url}\n
+Por favor, verifique se o endereço do site está correto e considere que ele pode não possuir registro no Brasil.\n
+Caso o endereço não possua registro no Brasil, tenha *cuidado*, pois fica mais difícil de garantir seus direitos como consumidor. 🧐`
         );
       } //finally {
       //   mutex.release();
       // }
     });
   });
-}
-
-async function getWhoisData(url) {
-  console.log("searching whois data");
-  try {
-    const response = await fetch(`http://localhost:80/whois/${url}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.status === 404) {
-      return null;
-    }
-    console.log(response.status);
-    return await response.json();
-  } catch (error) {
-    console.error("Erro ao obter dados Whois.", error);
-    return null;
-  }
-}
-
-async function getRfData(cnpj) {
-  console.log("searching receita data");
-  const cnpjSanitized = cnpj.replace(/[^\d]+/g, "");
-  try {
-    let response = await fetch(`http://localhost:80/receita/${cnpjSanitized}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response.status);
-    if (response.status === 404) {
-      return null;
-    }
-    console.log(response.status, "Busca Receita");
-    return await response.json();
-  } catch (error) {
-    console.error("Erro ao obter dados Receita.");
-    return null;
-  }
-}
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
