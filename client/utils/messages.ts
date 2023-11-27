@@ -8,10 +8,27 @@ export function printSuccess(data: Result) {
   let message = `O domínio ${data.domain} possui os seguintes dados ⤵️\n
 - *Criado:* ${printData(formatData(data.created))}
 - *Última vez alterado:* ${printData(formatData(data.changed))}
-- *Expira em:* ${printData(formatData(data.expiration))}`;
-  console.log(data.type);
+- *Expira em:* ${printData(formatData(data.expiration))}\n`;
+  if (data.created) {
+    const created = new Date(data.created);
+    const date = new Date();
+    const differenceMs = date.getTime() - created.getTime();
+
+    const years = Math.floor(differenceMs / (1000 * 60 * 60 * 24 * 365.25));
+
+    if (years == 0)
+      message += `- 🚨 *Cuidado*, o domínio enviado foi criado há menos de um ano.`;
+    else if (years <= 1)
+      message += `- 🚨 *Cuidado*, o domínio enviado foi criado recentemente e possui somente ${
+        years == 1 ? "1 ano" : years + " anos"
+      }.`;
+    else if (years <= 3)
+      message += `- ⚠️ O domínio enviado possui ${years} anos.`;
+    else message += `- ✅ O domínio enviado possui ${years} anos.`;
+  }
+
   if (data.type == "cpf")
-    message += `
+    message += `\n
 - *CPF:* ${data.cnpj} 🤔\n
 Não foi possível realizar uma análise mais profunda dos dados, pois o domínio não está registrado com um CNPJ. 😥
 ⚠️ Tenha cuidado, pois domínios registrados com um CPF, possuem maior risco de anonimato, devido à dificuldade de rastrear o responsável por atividades maliciosas.`;
@@ -19,7 +36,7 @@ Não foi possível realizar uma análise mais profunda dos dados, pois o domíni
     message += `
 - *Nome:* ${printData(data.name)}
 - *CNPJ:* ${printData(data.cnpj)}
-- *CNPJ Ativo:* ${data.active_cnpj == true ? "Sim ✅" : "Não ⚠️"}
+- *CNPJ Ativo:* ${data.active_cnpj == true ? "Sim ✅" : "Não 🚨"}
 - *Telefone:* ${printData(data.tel)}
 - *E-mail:* ${printData(data.email)}
 - *Endereço:* Rua ${printData(data.address.place)} N° ${printData(
@@ -34,7 +51,7 @@ Não foi possível realizar uma análise mais profunda dos dados, pois o domíni
       data.address.place &&
       data.address.number
     ) {
-      let link = `https://www.google.com/maps/search/${data.address.place}+${data.address.number}+${data.address.cep}+${data.address.city}+${data.address.uf}`;
+      let link = `https://www.google.com/maps/search/${data.address.place}+${data.address.number}+${data.address.city}+${data.address.uf}`;
 
       message += `\n\n📍 Para verificar a localização desse endereço no mapa, sinta-se à vontade para utilizar o link abaixo:
 ${link.replace(/ /g, "+")}`;
@@ -56,31 +73,19 @@ function printData(data: string | null) {
   return data;
 }
 
-export function welcomeMessage(name: String) {
+export function registerMessage(name: String) {
   return `Olá, ${name}. 👋
-Bem-vindo(a) ao nosso serviço de verificação de links! Estamos aqui para ajudar você a tomar decisões informadas sobre a confiabilidade de links que você recebe.
+Bem-vindo(a) ao nosso serviço de verificação de links! Estamos aqui para ajudar você a tomar decisões mais assertivas sobre a confiabilidade de links que você suspeita.
 Por favor, tenha em mente as seguintes informações: ⤵️
 *1.* Este bot realiza uma consulta na receita federal com os dados do responsável pelo domínio, mas não pode garantir 100% de precisão quanto a confiabilidade de um site.
 *2.* A decisão final sobre confiar ou não em um link é sempre sua. Recomendamos cautela, especialmente ao abrir links de remetentes desconhecidos.
 *3.* Não nos responsabilizamos por quaisquer danos resultantes do uso deste serviço. Use-o como uma ferramenta auxiliar, mas sempre confirme com suas próprias verificações. 
-Se deseja prosseguir, sinta-se à vontade para compartilhar um link que deseja que seja consultado.
+
+→ Digite 1 se deseja prosseguir e aproveitar todas as funcionalidades de análise de website. `;
+}
+export function welcomeMessage() {
+  return `Parabéns! 🥳
+Agora você tem acesso a todos os recursos de análise de websites.
+Sinta-se à vontade para compartilhar um domínio que deseja que seja consultado.
 Tenha uma ótima experiência!`;
 }
-// {
-//     "domain": "cefet-rj.br",
-//     "created": "1996-01-01",
-//     "changed": "2013-08-08",
-//     "expiration": null,
-//     "cnpj": "42.441.758/0001-05",
-//     "date": "04/07/1998",
-//     "active_cnpj": true,
-//     "tel": "",
-//     "email": "",
-//     "address": {
-//       "place": "AVENIDA MARACANA",
-//       "number": "229",
-//       "cep": "20.271-110",
-//       "city": "RIO DE JANEIRO",
-//       "uf": "RJ"
-//     }
-//   }

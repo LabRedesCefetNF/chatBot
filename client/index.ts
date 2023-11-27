@@ -11,7 +11,12 @@ import {
   saveMessageSender,
   sleep,
 } from "./utils/utils";
-import { printSuccess, welcomeMessage } from "./utils/messages.ts";
+import {
+  printSuccess,
+  registerMessage,
+  welcomeMessage,
+} from "./utils/messages.ts";
+import { checkLookup } from "./utils/dns.ts";
 
 const { Mutex } = require("async-mutex");
 
@@ -31,16 +36,22 @@ async function start(client: Whatsapp) {
 
     const isFirstMessage = await saveMessageSender(message);
     if (isFirstMessage) {
+      if (message.body == "1") {
+        await client.sendText(
+          message.from,
+          welcomeMessage(message.sender.pushname)
+        );
+        return;
+      }
       await client.sendText(
         message.from,
-        welcomeMessage(message.sender.pushname)
+        registerMessage(message.sender.pushname)
       );
       return;
     }
 
     const words = message.body.split(" ");
     let url = hasValidURL(words);
-    // console.log(message);
 
     if (!url) {
       await client.sendText(
@@ -58,7 +69,8 @@ async function start(client: Whatsapp) {
       url = url?.toLowerCase();
       url = url.replace(/https?[:\/]*/gi, "");
       url = url.split("/")[0];
-      if (url.endsWith(".com")) url += ".br";
+      const sameDNS = await checkLookup(url);
+      if (sameDNS && !url.endsWith(".br")) url += ".br";
       try {
         console.log(url);
         const data = await getWhoisData(url);
@@ -67,9 +79,7 @@ async function start(client: Whatsapp) {
           if (getDataFromDB(url)) {
             await client.sendText(
               message.from,
-              `Empresa já consta no nosso sistema. 🤓\n\n${printSuccess(
-                getDataFromDB(url)
-              )}`
+              `${printSuccess(getDataFromDB(url))}`
             );
             return;
           }
@@ -114,7 +124,7 @@ async function start(client: Whatsapp) {
         //Erro no fetch
         await client.sendText(
           message.from,
-          `Desculpe, ocorreu um erro ao consultar o link: ⚠️\n→ ${url}\n
+          `Ocorreu um erro ao consultar os dados administrativos do domínio: ⚠️\n→ ${url}\n
 Por favor, verifique se o endereço do site está correto e considere que ele pode não possuir registro no Brasil.\n
 Caso o endereço não possua registro no Brasil, tenha *cuidado*, pois fica mais difícil de garantir seus direitos como consumidor. 🧐`
         );

@@ -190,7 +190,7 @@ export async function getRfData(cnpj: string) {
 }
 async function findUser(number: String) {
   const numberSanitized = number.split("@")[0];
-  console.log("verificando se existe");
+  console.log("checking user");
   try {
     let response = await fetch(
       `http://localhost:80/api/users/number/${numberSanitized}`,
@@ -218,6 +218,7 @@ export async function saveMessageSender(message: Message) {
       console.error("Sender not defined in message:", message);
       return;
     }
+
     const { id: number, pushname: name } = message.sender;
 
     const isUserRegistered = await findUser(number);
@@ -225,6 +226,7 @@ export async function saveMessageSender(message: Message) {
       console.log("User already exists");
       return false;
     }
+    if (message.body != "1") return true;
 
     const data = {
       number,
@@ -244,7 +246,7 @@ export async function saveMessageSender(message: Message) {
 
     const responseData = await response.json();
     console.log("User saved successfully:", responseData);
-    return true
+    return true;
   } catch (error: any) {
     console.error("Error saving user:", error.message);
   }

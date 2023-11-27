@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import express from "express";
 import cors from "cors";
-import session from "express-session";
 import mongoose from "mongoose";
 
 import dotenv from "dotenv";
@@ -23,18 +22,7 @@ mongoose
   });
 
 app.use(express.json());
-app.use(
-  session({
-    secret: "BotWpp",
-    resave: true,
-    saveUninitialized: true,
-    cookie: {
-      maxAge: 300000,
-    },
-  })
-);
 
-app.use(express.static("public"));
 app.use(
   cors({
     origin: "*",
