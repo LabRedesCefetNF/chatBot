@@ -6,13 +6,15 @@
     "build": "rimraf ./build && tsc",
     "dev": "nodemon",
     "start": "node build/index.js",
-    "api": "node ./src/api/app.mjs"
+    "start-mongo": "docker-compose up -d",
+    "server": "npm run start-mongo && node ./server/app.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.1.5",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "mongoose": "^8.0.0",
     "node-fetch": "^3.3.2",
     "nodemon": "^2.0.22",
     "rimraf": "^5.0.0",
