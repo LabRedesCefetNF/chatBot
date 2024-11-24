@@ -91,3 +91,34 @@ Make sure you have the following components installed on your system:
 
 After following these steps, the application will be up and running. Ensure that all dependencies were installed correctly and no errors occurred during the startup process.
 
+## COPYRIGHT
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />It is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>. The licensor cannot revoke these freedoms as long as you follow the license terms:
+
+* __Attribution__ — You must give __appropriate credit__ like below:
+
+WINTER, C. E. T. W. E. T.; KLEIN, D. H.; LAZARIN, N. M. __Uma proposta de ferramenta de análise de dados administrativos como estratégia defensiva ao estelionato digital.__ Anais do XV Computer on the Beach - COTB’24. Anais... Em: COMPUTER ON THE BEACH. Balneário Camboriú - Santa Catarina - Brasil: Universidade do Vale do Itajaí, 28 maio 2024. DOI: 10.14210/cotb.v15.p315-317 Disponível em: <https://periodicos.univali.br/index.php/acotb/article/view/20379>. Acesso em: 24 nov. 2024
+
+
+
+<details>
+<summary> Cite using Bibtex </summary>
+
+```
+@inproceedings{winter_uma_2024,
+	address = {Balneário Camboriú - Santa Catarina - Brasil},
+	title = {Uma proposta de ferramenta de análise de dados administrativos como estratégia defensiva ao estelionato digital},
+	copyright = {Licença Creative Commons Attribution 4.0 International},
+	url = {https://periodicos.univali.br/index.php/acotb/article/view/20379},
+	doi = {10.14210/cotb.v15.p315-317},
+	language = {pt},
+	urldate = {2024-11-24},
+	booktitle = {Anais do {XV} {Computer} on the {Beach} - {COTB}'24},
+	publisher = {Universidade do Vale do Itajaí},
+	author = {Winter, Carlos Eduardo Taranto Winter Eduardo Taranto and Klein, Davi Heggdorne and Lazarin, Nilson Mori},
+	month = may,
+	year = {2024},
+	pages = {315--317},
+	file = {Texto completo:/home/nilson/Zotero/storage/VNXDCTZ2/Winter et al. - 2024 - Uma proposta de ferramenta de análise de dados administrativos como estratégia defensiva ao estelion.pdf:application/pdf},
+}
+```
+</details>
