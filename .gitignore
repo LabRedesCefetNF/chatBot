@@ -2,7 +2,6 @@ node_modules
 build
 tokens
 .env
-db.json
 
 .wwebjs_cache
 .wwebjs_auth
